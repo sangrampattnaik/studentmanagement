@@ -1,7 +1,9 @@
 
 
 import os
+
 from decouple import config
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -113,16 +115,22 @@ STATIC_URL = '/static/'
 
 # JWT Authentication 
 JWT_AUTH = {
-    "JWT_AUTHORIZATION_PREFIX": config("JWT_AUTHORIZATION_PREFIX"),
+    "JWT_AUTHORIZATION_HEADER_KEY": config("JWT_AUTHORIZATION_HEADER_KEY"),
+
+    "JWT_AUTHORIZATION_HEADER_PREFIX": config("JWT_AUTHORIZATION_HEADER_PREFIX"),
+
     "JWT_TOKEN_EXPIRATION_TIME_IN_SECONDS": config(
         "JWT_TOKEN_EXPIRATION_TIME_IN_SECONDS", cast=int
     ),
+
     "JWT_TOKEN_EXPIRATION_TIME_IN_MINUTES": config(
         "JWT_TOKEN_EXPIRATION_TIME_IN_MINUTES", cast=int
     ),
+
     "JWT_TOKEN_EXPIRATION_TIME_IN_HOURS": config(
         "JWT_TOKEN_EXPIRATION_TIME_IN_HOURS", cast=int
     ),
+
     "JWT_TOKEN_EXPIRATION_TIME_IN_DAYS": config(
         "JWT_TOKEN_EXPIRATION_TIME_IN_DAYS", cast=int
     ),
