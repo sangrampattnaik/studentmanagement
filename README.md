@@ -1,5 +1,6 @@
 # Student  Management System
 
+ Note: Postgres database should be installed. configure postgres credential and connection by creating .env file by following .env.example file
 
 
 ## step - 1
