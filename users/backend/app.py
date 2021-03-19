@@ -116,9 +116,9 @@ def authenticate_user(body):
     }, 401
 
 
-def get(request, Model, Serializer, many=False, **kwargs):
+def get(request, Serializer, many=False, **kwargs):
     if many:
-        queryset = get_list_or_404(Model, **kwargs)
+        queryset = Person.objects.filter(**kwargs)
         serialized_data, count, next_page, previous_page = paginate(
             request, queryset, Serializer
         )
