@@ -1,5 +1,5 @@
 import datetime
-
+from users.models import Person
 import jwt
 from django.conf import settings
 from django.contrib.auth import authenticate
@@ -126,5 +126,33 @@ def post(body, Person, TeacherSerializer, is_teacher=False, is_student=False):
 
 def delete(Model, **kwargs):
     person = get_object_or_404(Model, **kwargs)
+    User.objects.filter(id=person.user.id).delete()
     person.delete()
     return {"status": "success", "msg": "user deleted"}, 200
+
+
+
+def put(body,id):
+    person = get_object_or_404(Person, id=id)
+    user = User.objects.get(username=person.user.username)
+    body = body.dict()
+    username = body.get('username')
+    email = body.get('email')
+    last_name = body.get('last_name')
+    first_name = body.get('first_name')
+
+    if username:
+        if not username == person.user.username:
+            if not User.objects.filter(username=username).exists():
+                user.username = username
+    if email:
+        if not email == person.user.email:
+            if user := User.objects.filter(email=email).exists():
+                user.email = email
+    if last_name:
+        user.last_name = last_name
+    if first_name:
+        user.first_name = first_name
+    user.save()
+    person.save()
+    return {"status":"success",'msg':"user updated"},200

@@ -5,8 +5,8 @@ from ninja import Query, Router
 
 from .backend import app
 from .models import Person
-from .schemas import PageSizeQuerySchema, UserLoginSchema, UserSchema
-from .serializers import TeacherSerializer
+from .schemas import PageSizeQuerySchema, UserLoginSchema, UserSchema,UserUpdateSchema
+from .serializers import TeacherSerializer,StudentSerializer
 
 router = Router()
 
@@ -37,7 +37,7 @@ def teacher_list_api_view(request, query_params: PageSizeQuerySchema = Query(...
 
 @router.post("/teacher", tags=["teacher"], summary="create a teacher")
 def teacher_create_api_view(request, body: UserSchema):
-    response, status = app.post(body, Person, TeacherSerializer)
+    response, status = app.post(body, Person, TeacherSerializer,is_teacher=True)
     return JsonResponse(response, status=status)
 
 
@@ -56,8 +56,9 @@ def teacher_retrive_api_view(request, teacher_id):
     tags=["teacher"],
     summary="fully and partial update of a teacher",
 )
-def teacher_update_router_view(request):
-    pass
+def teacher_update_router_view(request,teacher_id,body : UserUpdateSchema = None):
+    response,status = app.put(body,teacher_id)
+    return JsonResponse(response,status=status)
 
 
 @router.delete("/teacher/{teacher_id}", tags=["teacher"], summary="delete a teacher")
@@ -67,31 +68,39 @@ def teacher_destroy_api_view(request, teacher_id):
 
 
 @router.get("/student", tags=["student"], summary="get list of students")
-def student_list_api_view(request):
-    pass
+def student_list_api_view(request,query_params: PageSizeQuerySchema = Query(...)):
+    response, status = app.get(
+        request, Person, StudentSerializer, many=True, is_student=True
+    )
+    return JsonResponse(response, status=status)
 
 
 @router.post("/student", tags=["student"], summary="create a student")
-def student_create_api_view(request):
-    pass
+def student_create_api_view(request,body:UserSchema):
+    response, status = app.post(body, Person, StudentSerializer,is_student=True)
+    return JsonResponse(response, status=status)
 
 
 @router.get(
     "/student/{student_id}", tags=["student"], summary="git a particlar student"
 )
-def student_retrive_api_view(request):
-    pass
-
+def student_retrive_api_view(request,student_id):
+    response, status = app.get(
+        request, Person, StudentSerializer, many=False, is_student=True, id=student_id
+    )
+    return JsonResponse(response, status=status)
 
 @router.put(
     "/student/{student_id}",
     tags=["student"],
     summary="fully and partial update of a student",
 )
-def student_update_api_view(request):
-    pass
+def student_update_api_view(request,student_id,body:UserUpdateSchema = None):
+    response,status = app.put(body,student_id)
+    return JsonResponse(response,status=status)
 
 
 @router.delete("/student/{student_id}", tags=["student"], summary="delete a student")
-def student_destroy_api_view(request):
-    pass
+def student_destroy_api_view(request,student_id):
+    response, status = app.delete(Person, id=student_id)
+    return JsonResponse(response, status=status)

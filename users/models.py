@@ -41,7 +41,7 @@ class Person(models.Model):
             last_name=kwargs["last_name"],
             email=kwargs["email"],
         )
-        return Cls.objects.create(user=user, is_student=True)
+        return cls.objects.create(user=user, is_student=True)
 
     @classmethod
     def create_teacher(cls, **kwargs):
