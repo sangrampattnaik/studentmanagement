@@ -5,7 +5,7 @@ from ninja import Query, Router
 
 from .backend import app
 from .models import Person
-from .schemas import PageSizeQuerySchema, UserLoginSchema, UserSchema,UserUpdateSchema
+from .schemas import PageSizeQuerySchema, UserLoginSchema, UserSchema,UserUpdateSchema,ForgotPasswordSchema
 from .serializers import TeacherSerializer,StudentSerializer
 
 router = Router()
@@ -21,10 +21,10 @@ def user_login(request, body: UserLoginSchema):
     "/forgot-password",
     tags=["user forgot password"],
     summary="reset user forgotten password",
-    auth=None,
 )
-def forgot_password(request):
-    print(request.auth)
+def forgot_password(request,body:ForgotPasswordSchema):
+    response,status = app.reset_password(body,request.auth['id'])
+    return JsonResponse(response,status=status)
 
 
 @router.get("/teacher", tags=["teacher"], summary="get list of teachers")
@@ -56,7 +56,7 @@ def teacher_retrive_api_view(request, teacher_id):
     tags=["teacher"],
     summary="fully and partial update of a teacher",
 )
-def teacher_update_router_view(request,teacher_id,body : UserUpdateSchema = None):
+def teacher_update_api_view(request,teacher_id,body : UserUpdateSchema = None):
     response,status = app.put(body,teacher_id)
     return JsonResponse(response,status=status)
 

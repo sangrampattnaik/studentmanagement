@@ -3,7 +3,7 @@ import os
 import django
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
-
+from users.models import Person
 
 class Command(BaseCommand):
     help = "create superuser username = admin and password = admin"
@@ -14,7 +14,8 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR("already admin superuser created"))
                 quit()
             else:
-                User.objects.create_superuser(username="admin", password="admin")
+                user = User.objects.create_superuser(username="admin", password="admin")
+                Person.objects.create(is_superuser=true,user=user)
                 self.stdout.write(
                     self.style.SUCCESS(
                         'super user "admin" created and password = "admin"'

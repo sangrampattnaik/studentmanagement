@@ -5,7 +5,45 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.shortcuts import get_list_or_404, get_object_or_404
+import re
 
+
+def password_validation(password):
+    reg = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,20}$"
+    mat = re.fullmatch(reg, password)
+    if mat:
+        return True, password
+    return (
+        False,
+        "Password should have atleast 8 characters, one upper case, one lower case, one digit and one special character",
+    )
+
+def reset_password(body,id):
+    body = body.dict()
+    user = get_object_or_404(User,id=id)
+    if body['new_password'] != body['confirm_password']:
+        return {"status":"failed",'msg':"new password and confirm password should be matched"},400
+    error,msg = password_validation(body['new_password'])
+    if not error:
+        return {"status":"failed",'msg':error},400
+    auth_user = authenticate(username=user.username,password=body['old_password'])
+    print(auth_user)
+    if auth_user:
+        user.set_password(body['new_password'])
+        user.save()
+        return {"status":"success",'msg':"new password updated"},200
+    else:
+        return {"status":"failed",'msg':"incorrect old password"},400
+
+
+def email_validation(email):
+    regex = "[a-zA-Z]+.*@.+[.].+$"
+    match = re.fullmatch(regex, email)
+    if User.objects.filter(email=email).exists():
+        return False, "email already registerd"
+    if not match:
+        return False, "Invalid Email"
+    return True, None
 
 def paginate(request, queryset, Serializer):
     try:
@@ -100,8 +138,12 @@ def post(body, Person, TeacherSerializer, is_teacher=False, is_student=False):
     body = body.dict()
     if User.objects.filter(username=body["username"]).exists():
         return {"status": "failed", "msg": "username already taken"}, 400
-    if User.objects.filter(email=body["email"]).exists():
-        return {"status": "failed", "msg": "email already taken"}, 400
+    error,msg = email_validation(body['email'])
+    if not error:
+        return {"status": "failed", "msg": msg}, 400
+    error_in_pwd,msg = password_validation(body['password'])
+    if not error_in_pwd:
+        return {"status": "failed", "msg": msg}, 400
     if is_teacher:
         person = Person.create_teacher(
             username=body["username"],
@@ -142,13 +184,16 @@ def put(body,id):
     first_name = body.get('first_name')
 
     if username:
-        if not username == person.user.username:
+        if username != person.user.username:
             if not User.objects.filter(username=username).exists():
                 user.username = username
     if email:
-        if not email == person.user.email:
-            if user := User.objects.filter(email=email).exists():
-                user.email = email
+        if email != person.user.email:
+            error,msg = email_validation(body['email'])
+            if not error:
+                return {"status": "failed", "msg": msg}, 400
+            else:
+                user.email = body['email']
     if last_name:
         user.last_name = last_name
     if first_name:

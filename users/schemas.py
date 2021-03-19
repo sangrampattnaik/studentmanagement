@@ -13,6 +13,11 @@ class UserSchema(Schema):
     first_name: str
     last_name: str
 
+class ForgotPasswordSchema(Schema):
+    old_password: str
+    new_password: str
+    confirm_password: str
+
 class UserUpdateSchema(Schema):
     username: str = None
     email: str = None

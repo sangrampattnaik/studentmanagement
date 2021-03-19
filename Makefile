@@ -15,7 +15,7 @@ initial-setup:
 
 superuser:
 	# create superuser
-	@$(python) $(manage) createsuperuser
+	@$(python) $(manage) superadmin
 
 migrate:
 	# create database and table
