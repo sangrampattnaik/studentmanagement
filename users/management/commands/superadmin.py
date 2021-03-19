@@ -1,9 +1,13 @@
-import sys,django
-from users.models import User,Person
-from django.core.management.base import BaseCommand
-from users.backend import app
-from getpass import getpass
 import re
+import sys
+from getpass import getpass
+
+import django
+from django.core.management.base import BaseCommand
+
+from users.backend import app
+from users.models import Person, User
+
 
 def validate_password(password):
     reg = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,20}$"
@@ -42,7 +46,7 @@ class Command(BaseCommand):
             while password != cpassword:
                 self.stdout.write(self.style.ERROR('password does not match'))
                 cpassword = getpass("Confirm password: ")
-            user = User.objects.create_superuser(username=username,password=password)
+            user = User.objects.create_superuser(username=username,password=password,first_name=first_name,last_name=last_name,email=email)
             Person(user=user,is_superuser=True).save()
             self.stdout.write(self.style.SUCCESS("super admin created successfully"))
         except django.db.utils.OperationalError:

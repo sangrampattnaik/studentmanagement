@@ -20,10 +20,16 @@ from ninja import NinjaAPI
 from auth.ninja_auth import Authorization
 from users.views import router as user_router
 
-api = NinjaAPI(title="Student Management System",version="1.0.0",docs_url="swagger/",description="Student management system...Everything managed by teacher and super-admin",auth=Authorization())
-api.add_router("users/",user_router)
+api = NinjaAPI(
+    title="Student Management System",
+    version="1.0.0",
+    docs_url="swagger/",
+    description="Student management system...Everything managed by teacher and super-admin",
+    auth=Authorization(),
+)
+api.add_router("users/", user_router)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', api.urls),
+    path("admin/", admin.site.urls),
+    path("", api.urls),
 ]

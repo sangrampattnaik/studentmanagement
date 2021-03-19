@@ -1,14 +1,26 @@
 import datetime
-from users.models import Person
+import re
+
 import jwt
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.shortcuts import get_list_or_404, get_object_or_404
-import re
+
+from users.models import Person
 
 
 def password_validation(password):
+    '''
+    password validation like minimum 8 to 20 chars including digit, special char, upper case and lower case
+
+    params:
+        password : str
+    
+    return 
+        bool : True / False
+        error message : str
+    '''
     reg = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,20}$"
     mat = re.fullmatch(reg, password)
     if mat:
@@ -19,6 +31,17 @@ def password_validation(password):
     )
 
 def reset_password(body,id):
+    '''
+    user can reset password 
+
+    params:
+        body : dict (old_password , new_password and confirm_password) 
+        id: int
+    
+    return 
+        response : user response
+        status_code : int
+    '''
     body = body.dict()
     user = get_object_or_404(User,id=id)
     if body['new_password'] != body['confirm_password']:
@@ -37,6 +60,16 @@ def reset_password(body,id):
 
 
 def email_validation(email):
+    '''
+    email validation like @ and domain
+
+    params:
+        email : str
+    
+    return 
+        bool : True / False
+        error message : str
+    '''
     regex = "[a-zA-Z]+.*@.+[.].+$"
     match = re.fullmatch(regex, email)
     if User.objects.filter(email=email).exists():
@@ -46,6 +79,21 @@ def email_validation(email):
     return True, None
 
 def paginate(request, queryset, Serializer):
+    '''
+    pagination of data according to page and size
+
+    params:
+        request : end user request
+        queryset : models queryset
+        serializer : serilization class
+    
+    return 
+        count : int
+        next_page : url
+        previous_page : url,
+        data : serialized response data
+    '''
+
     try:
         if (count := len(queryset)) == 0:
             return [], 0, "", ""
@@ -86,6 +134,15 @@ def paginate(request, queryset, Serializer):
 
 
 def get_token(user):
+    '''
+    generate a JWT token
+
+    params:
+        user : db user object
+    
+    return 
+        token : str (JWT token)
+    '''
     td = datetime.timedelta(
         days=settings.JWT_AUTH["JWT_TOKEN_EXPIRATION_TIME_IN_DAYS"],
         hours=settings.JWT_AUTH["JWT_TOKEN_EXPIRATION_TIME_IN_HOURS"],
@@ -104,6 +161,16 @@ def get_token(user):
 
 
 def authenticate_user(body):
+    '''
+    authenticate user by username and password
+
+    params:
+        body : dict (username and password)
+    
+    return 
+        token : str (JWT token)
+        status_code : int
+    '''
     body = body.dict()
     user = authenticate(username=body["username"], password=body["password"])
     if user:
@@ -117,6 +184,20 @@ def authenticate_user(body):
 
 
 def get(request, Serializer, many=False, **kwargs):
+    '''
+    get data from database and send serialized response
+
+    params:
+        request : end user request
+        Serializer : data serialization
+        many : bool (True / False) = True to serilaize list of records and False to serialize a single record
+        kwargs : dict (model fields)
+    
+    return 
+        response : dict
+        status_code : int
+        
+    '''
     if many:
         queryset = Person.objects.filter(**kwargs)
         serialized_data, count, next_page, previous_page = paginate(
@@ -134,7 +215,21 @@ def get(request, Serializer, many=False, **kwargs):
         return {"status": "success", "data": serialized_data}, 200
 
 
-def post(body, Person, TeacherSerializer, is_teacher=False, is_student=False):
+def post(body, Person, Serializer, is_teacher=False, is_student=False):
+    '''
+    get data from database and send serialized response
+
+    params:
+        request : end user request
+        Serializer : data serialization
+        many : bool (True / False) = True to serilaize list of records and False to serialize a single record
+        kwargs : dict (model fields)
+    
+    return 
+        response : dict
+        status_code : int
+        
+    '''
     body = body.dict()
     if User.objects.filter(username=body["username"]).exists():
         return {"status": "failed", "msg": "username already taken"}, 400
@@ -162,12 +257,22 @@ def post(body, Person, TeacherSerializer, is_teacher=False, is_student=False):
         )
     else:
         return {"status": "failed"}, 400
-    serialized_data = TeacherSerializer(person).data
+    serialized_data = Serializer(person).data
     return {"status": "success", "msg": "teacher created", "data": serialized_data}, 201
 
 
-def delete(Model, **kwargs):
-    person = get_object_or_404(Model, **kwargs)
+def delete(**kwargs):
+    '''
+    delete user data from database
+
+    params:
+        kwargs : dict (model fields like id)
+    return 
+        response : dict
+        status_code : int
+        
+    '''
+    person = get_object_or_404(Person, **kwargs)
     User.objects.filter(id=person.user.id).delete()
     person.delete()
     return {"status": "success", "msg": "user deleted"}, 200
@@ -175,6 +280,17 @@ def delete(Model, **kwargs):
 
 
 def put(body,id):
+    '''
+    update user data
+
+    params:
+        body : dict (user model fields)
+        id : int 
+    return 
+        response : dict
+        status_code : int
+        
+    '''
     person = get_object_or_404(Person, id=id)
     user = User.objects.get(username=person.user.username)
     body = body.dict()

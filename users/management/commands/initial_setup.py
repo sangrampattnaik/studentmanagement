@@ -3,7 +3,9 @@ import os
 import django
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
+
 from users.models import Person
+
 
 class Command(BaseCommand):
     help = "create superuser username = admin and password = admin"
@@ -15,10 +17,10 @@ class Command(BaseCommand):
                 quit()
             else:
                 user = User.objects.create_superuser(username="admin", password="admin")
-                Person.objects.create(is_superuser=true,user=user)
+                Person.objects.create(is_superuser=True,user=user)
                 self.stdout.write(
                     self.style.SUCCESS(
-                        'super user "admin" created and password = "admin"'
+                        'super-admin username = "admin" created and password = "admin"'
                     )
                 )
         except django.db.utils.OperationalError:

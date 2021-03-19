@@ -4,6 +4,9 @@ from ninja.security import APIKeyHeader
 
 
 class Authorization(APIKeyHeader):
+    '''
+    Authorization by using JWT token
+    '''
     param_name = settings.JWT_AUTH['JWT_AUTHORIZATION_HEADER_KEY']
 
     def authenticate(self, request, key):
