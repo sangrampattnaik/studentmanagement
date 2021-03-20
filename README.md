@@ -2,7 +2,7 @@
 
  Note - 1: Postgres database should be installed. configure postgres credential and connection by creating .env file by following .env.example file.
  
- Note - 2: Don' t create superuser by `python manage.py createsuperuser`. User `make superuser` or `python manage.py superadmin`. 
+ Note - 2: Don' t create superuser by `python manage.py createsuperuser`. Use `make superuser` or `python manage.py superadmin`. 
 
 
 ## step - 1
